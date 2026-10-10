@@ -1,5 +1,6 @@
 package su.nightexpress.excellentcrates.api.reward.event;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -18,7 +19,7 @@ public class RewardGrantedEvent extends Event {
     private final Reward reward;
 
     public RewardGrantedEvent(Player player, Crate crate, Reward reward) {
-        super();
+        super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.crate = crate;
         this.reward = reward;

@@ -2,7 +2,9 @@ package su.nightexpress.excellentcrates.reward.grant.pipeline;
 
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NullMarked;
 
 import su.nightexpress.excellentcrates.api.crate.Crate;
@@ -17,9 +19,11 @@ import su.nightexpress.excellentcrates.reward.grant.RewardGrantService;
 public class RewardGrantPipelineExecutor implements PipelineExecutor {
 
     private final RewardGrantService grantService;
+    private final JavaPlugin plugin;
 
     public RewardGrantPipelineExecutor(RewardGrantService grantService) {
         this.grantService = grantService;
+        this.plugin = JavaPlugin.getProvidingPlugin(RewardGrantPipelineExecutor.class);
     }
 
     @Override
@@ -30,8 +34,14 @@ public class RewardGrantPipelineExecutor implements PipelineExecutor {
         if (rewardsComponent == null) return;
 
         List<PipelineReward> rewards = rewardsComponent.getTargetRewards();
-        rewards.forEach(pipelineReward -> {
-            this.grantService.giveReward(player, crate, pipelineReward.getGranted());
+        
+        // Execute fully async without artificial delay, to avoid main thread lag
+        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+            rewards.forEach(pipelineReward -> {
+                if (player.isOnline()) {
+                    this.grantService.giveReward(player, crate, pipelineReward.getGranted());
+                }
+            });
         });
     }
 }

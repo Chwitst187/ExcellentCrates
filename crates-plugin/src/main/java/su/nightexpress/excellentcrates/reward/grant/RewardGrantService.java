@@ -28,6 +28,8 @@ public class RewardGrantService {
     private final CratePlaceholders                      cratePlaceholders;
     private final RewardPlaceholders                     rewardPlaceholders;
     private final RewardMessageDispatcher                dispatcher;
+    
+    private List<RewardGrantProcessor> cachedPipeline;
 
     public RewardGrantService(TinyRegistry<RegisteredGrantProcessor> processors,
                               CratePlaceholders cratePlaceholders,
@@ -39,16 +41,19 @@ public class RewardGrantService {
         this.dispatcher = dispatcher;
     }
 
-    // Not cached into a field because the processors can be registered at any time, even after this service is constructed.
-    private List<RewardGrantProcessor> compilePipeline() {
-        return this.processors.getEntries().stream()
-            .sorted(Comparator.comparingInt(RegisteredGrantProcessor::priority))
-            .map(RegisteredGrantProcessor::processor)
-            .toList();
+    private List<RewardGrantProcessor> getPipeline() {
+        if (this.cachedPipeline == null) {
+            this.cachedPipeline = this.processors.getEntries().stream()
+                .sorted(Comparator.comparingInt(RegisteredGrantProcessor::priority))
+                .map(RegisteredGrantProcessor::processor)
+                .toList();
+        }
+        return this.cachedPipeline;
     }
 
     public void registerProcessor(int priority, RewardGrantProcessor processor) {
         this.processors.register(new RegisteredGrantProcessor(priority, processor));
+        this.cachedPipeline = null; // Invalidate cache
     }
 
     public void giveReward(Player player, Crate crate, Reward reward) {
@@ -65,7 +70,7 @@ public class RewardGrantService {
             .andThen(CommonPlaceholders.forPlaceholderAPI(player))
             .build();
 
-        this.compilePipeline().forEach(processor -> {
+        this.getPipeline().forEach(processor -> {
             processor.execute(player, crate, reward, placeholders);
         });
 
