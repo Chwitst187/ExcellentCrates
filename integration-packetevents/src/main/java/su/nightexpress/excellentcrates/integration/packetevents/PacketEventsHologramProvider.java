@@ -69,7 +69,11 @@ public class PacketEventsHologramProvider implements HologramProvider {
 
         double visibilityDistance = this.settings.get().visibleDistance();
 
-        Collection<Player> players = world.getNearbyPlayers(location, visibilityDistance);
+        double visDistSq = visibilityDistance * visibilityDistance;
+        Collection<Player> players = Bukkit.getOnlinePlayers().stream()
+            .filter(p -> p.getWorld().equals(world))
+            .filter(p -> p.getLocation().distanceSquared(location) <= visDistSq)
+            .collect(Collectors.toList());
         if (players.isEmpty()) {
             this.removeHologram(hologram);
             return;
