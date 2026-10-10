@@ -33,21 +33,31 @@ public class KeyPlaceholderAPIResolver implements PlaceholderAPIResolver {
         }
 
         // Separate the key ID from the rest of the identifier
-        int lastUnderscore = identifier.lastIndexOf('_');
+        int splitIndex = -1;
+        String[] knownPrefixes = { "key_balance_", "key_name_", "key_lore_", "key_id_" };
+        for (String prefix : knownPrefixes) {
+            if (identifier.startsWith(prefix)) {
+                splitIndex = prefix.length() - 1;
+                break;
+            }
+        }
+        if (splitIndex == -1) {
+            splitIndex = identifier.lastIndexOf('_');
+        }
 
         // If the last underscore is at or before the prefix, the format is invalid
-        if (lastUnderscore <= PREFIX.length() - 1) {
+        if (splitIndex <= PREFIX.length() - 1) {
             return null;
         }
 
-        String keyId = identifier.substring(lastUnderscore + 1);
+        String keyId = identifier.substring(splitIndex + 1);
         Identifier id = IdentifierParser.parse(keyId).orElse(null);
         CrateKey key = id == null ? null : this.resolver.resolveKey(id);
         if (key == null) {
             return new PlaceholderAPIResult(null);
         }
 
-        String cleanPlaceholder = "%" + identifier.substring(0, lastUnderscore) + "%";
+        String cleanPlaceholder = "%" + identifier.substring(0, splitIndex) + "%";
 
         PlaceholderContext context = PlaceholderContext.builder()
             .apply(this.placeholders.allPlaceholders(key, player))
@@ -59,3 +69,4 @@ public class KeyPlaceholderAPIResolver implements PlaceholderAPIResolver {
     }
 
 }
+

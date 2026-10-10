@@ -33,21 +33,35 @@ public class CratePlaceholderAPIResolver implements PlaceholderAPIResolver {
         }
 
         // Separate the crate ID from the rest of the identifier
-        int lastUnderscore = identifier.lastIndexOf('_');
+        int splitIndex = -1;
+        String[] knownPrefixes = {
+            "crate_id_", "crate_name_", "crate_description_",
+            "crate_effective_cooldown_", "crate_initial_global_cooldown_",
+            "crate_initial_individual_cooldown_", "crate_total_rewards_weight_"
+        };
+        for (String prefix : knownPrefixes) {
+            if (identifier.startsWith(prefix)) {
+                splitIndex = prefix.length() - 1;
+                break;
+            }
+        }
+        if (splitIndex == -1) {
+            splitIndex = identifier.lastIndexOf('_');
+        }
 
         // If the last underscore is at or before the prefix, the format is invalid
-        if (lastUnderscore <= PREFIX.length() - 1) {
+        if (splitIndex <= PREFIX.length() - 1) {
             return null;
         }
 
-        String crateId = identifier.substring(lastUnderscore + 1);
+        String crateId = identifier.substring(splitIndex + 1);
         Identifier id = IdentifierParser.parse(crateId).orElse(null);
         Crate crate = id == null ? null : this.crateResolver.resolveCrate(id);
         if (crate == null) {
             return new PlaceholderAPIResult(null);
         }
 
-        String cleanPlaceholder = "%" + identifier.substring(0, lastUnderscore) + "%";
+        String cleanPlaceholder = "%" + identifier.substring(0, splitIndex) + "%";
 
         PlaceholderContext context = PlaceholderContext.builder()
             .apply(this.placeholders.allPlaceholders(crate, player))
@@ -58,3 +72,4 @@ public class CratePlaceholderAPIResolver implements PlaceholderAPIResolver {
         return new PlaceholderAPIResult(result);
     }
 }
+
