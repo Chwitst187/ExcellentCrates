@@ -35,11 +35,11 @@ import su.nightexpress.nightcore.util.placeholder.CommonPlaceholders;
 public class KeyItemDropCommand implements KeyCommand {
 
     private static final String ARGUMENT_KEY    = "key";
-    private static final String ARGUMENT_AMOUNT = "amount";
-    private static final String ARGUMENT_WORLD  = "world";
     private static final String ARGUMENT_X      = "x";
     private static final String ARGUMENT_Y      = "y";
     private static final String ARGUMENT_Z      = "z";
+    private static final String ARGUMENT_WORLD  = "world";
+    private static final String ARGUMENT_AMOUNT = "amount";
 
     private final KeyItemService       itemService;
     private final KeyMessageDispatcher dispatcher;
@@ -56,10 +56,6 @@ public class KeyItemDropCommand implements KeyCommand {
             .permission(KeyPerms.COMMAND_DROP)
             .withArguments(
                 Arguments.argument(ARGUMENT_KEY, CrateKey.class),
-                Arguments.integer(ARGUMENT_AMOUNT, 1)
-                    .localized(CoreLang.COMMAND_ARGUMENT_NAME_AMOUNT)
-                    .suggestions((reader, context) -> Lists.newList("1", "5", "10")),
-                Arguments.world(ARGUMENT_WORLD),
                 Arguments.decimal(ARGUMENT_X)
                     .localized(Lang.COMMAND_ARGUMENT_NAME_X)
                     .suggestions((reader, context) -> getCoords(context, Location::getBlockX)),
@@ -68,7 +64,12 @@ public class KeyItemDropCommand implements KeyCommand {
                     .suggestions((reader, context) -> getCoords(context, Location::getBlockY)),
                 Arguments.decimal(ARGUMENT_Z)
                     .localized(Lang.COMMAND_ARGUMENT_NAME_Z)
-                    .suggestions((reader, context) -> getCoords(context, Location::getBlockZ))
+                    .suggestions((reader, context) -> getCoords(context, Location::getBlockZ)),
+                Arguments.world(ARGUMENT_WORLD).optional(),
+                Arguments.integer(ARGUMENT_AMOUNT, 1)
+                    .localized(CoreLang.COMMAND_ARGUMENT_NAME_AMOUNT)
+                    .suggestions((reader, context) -> Lists.newList("1", "5", "10"))
+                    .optional()
             )
             .executes(this::run)
         );
@@ -86,12 +87,23 @@ public class KeyItemDropCommand implements KeyCommand {
         CommandSender sender = context.getSender();
 
         CrateKey key = arguments.get(ARGUMENT_KEY, CrateKey.class);
-        int amount = arguments.getInt(ARGUMENT_AMOUNT, 1);
-
-        World world = arguments.getWorld(ARGUMENT_WORLD);
         double x = arguments.getDouble(ARGUMENT_X);
         double y = arguments.getDouble(ARGUMENT_Y);
         double z = arguments.getDouble(ARGUMENT_Z);
+
+        World world;
+        if (arguments.contains(ARGUMENT_WORLD)) {
+            world = arguments.getWorld(ARGUMENT_WORLD);
+        }
+        else if (context.isPlayer()) {
+            world = context.getPlayerOrThrow().getWorld();
+        }
+        else {
+            context.printUsage();
+            return false;
+        }
+
+        int amount = arguments.getInt(ARGUMENT_AMOUNT, 1);
 
         ItemStack itemStack = this.itemService.createTaggedItem(key).orElse(null);
         if (itemStack == null) {

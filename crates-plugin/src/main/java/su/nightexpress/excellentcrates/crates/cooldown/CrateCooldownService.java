@@ -121,4 +121,7 @@ public class CrateCooldownService {
             this.dataService.markDirty(data);
         }
     }
+    public void resetCooldown(UUID playerId, Identifier crateId) {
+        this.dataService.markRemoved(playerId, crateId);
+    }
 }

@@ -3,6 +3,7 @@ package su.nightexpress.excellentcrates.crates.command;
 import org.jspecify.annotations.NullMarked;
 
 import su.nightexpress.engine.bootstrap.context.NamedBootstrapContext;
+import su.nightexpress.engine.dispatcher.MessageDispatcher;
 import su.nightexpress.engine.id.Identifier;
 import su.nightexpress.engine.registry.SimpleRegistry;
 import su.nightexpress.engine.registry.TinyRegistry;
@@ -30,11 +31,14 @@ public final class CrateCommandsContext extends NamedBootstrapContext {
 
     public CrateCommandsContext(CratesPlugin plugin,
                                 CrateRegistry registry,
-                                ReadOnlySettings<CrateCoreSettings> settings) {
+                                ReadOnlySettings<CrateCoreSettings> settings,
+                                MessageDispatcher dispatcher) {
         super(ID, NAME);
         this.commands = new SimpleRegistry<>();
 
         Arguments.register(Crate.class, new CrateArgumentType(registry));
+
+        this.commands.register(new CrateReloadCommand(plugin, dispatcher));
 
         this.addComponent(new CrateCommandRegistrarController(plugin, this.commands, settings));
 

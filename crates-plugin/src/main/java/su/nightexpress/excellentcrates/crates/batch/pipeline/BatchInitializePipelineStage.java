@@ -24,10 +24,12 @@ public class BatchInitializePipelineStage implements PipelineStage {
 
     @Override
     public void intercept(Player player, Crate crate, PipelineContext context, PipelineChain chain) {
-        int initialAmount = this.settings.get().maxBatchSize();
-        BatchPipelineComponent batchComponent = new DefaultCrateBatchPipelineComponent(initialAmount);
+        if (!context.hasComponent(PipelineComponentKeys.BATCH)) {
+            int initialAmount = this.settings.get().maxBatchSize();
+            BatchPipelineComponent batchComponent = new DefaultCrateBatchPipelineComponent(initialAmount);
 
-        context.putComponent(PipelineComponentKeys.BATCH, batchComponent);
+            context.putComponent(PipelineComponentKeys.BATCH, batchComponent);
+        }
         chain.proceed(player, context);
     }
 }

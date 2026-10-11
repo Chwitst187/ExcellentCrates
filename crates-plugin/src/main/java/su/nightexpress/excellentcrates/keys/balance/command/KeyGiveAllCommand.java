@@ -29,8 +29,10 @@ public class KeyGiveAllCommand implements KeyCommand {
     private static final String ARGUMENT_KEY    = "key";
     private static final String ARGUMENT_AMOUNT = "amount";
 
-    private static final String FLAG_SILENT          = "s";
-    private static final String FLAG_SILENT_FEEDBACK = "sf";
+    private static final String FLAG_SILENT               = "s";
+    private static final String FLAG_SILENT_LONG          = "silent";
+    private static final String FLAG_SILENT_FEEDBACK      = "sf";
+    private static final String FLAG_SILENT_FEEDBACK_LONG = "silentfeedback";
 
     private final KeyBalanceService    balanceService;
     private final KeyMessageDispatcher dispatcher;
@@ -52,7 +54,7 @@ public class KeyGiveAllCommand implements KeyCommand {
                     .optional()
                     .suggestions((reader, context) -> List.of("1", "5", "10"))
             )
-            .withFlags(FLAG_SILENT, FLAG_SILENT_FEEDBACK)
+            .withFlags(FLAG_SILENT, FLAG_SILENT_LONG, FLAG_SILENT_FEEDBACK, FLAG_SILENT_FEEDBACK_LONG)
             .executes(this::run)
         );
     }
@@ -61,6 +63,9 @@ public class KeyGiveAllCommand implements KeyCommand {
         CrateKey key = arguments.get(ARGUMENT_KEY, CrateKey.class);
         int amount = Math.abs(arguments.getInt(ARGUMENT_AMOUNT, 1));
         CommandSender sender = context.getSender();
+
+        boolean silent = context.hasFlag(FLAG_SILENT) || context.hasFlag(FLAG_SILENT_LONG);
+        boolean silentFeedback = context.hasFlag(FLAG_SILENT_FEEDBACK) || context.hasFlag(FLAG_SILENT_FEEDBACK_LONG);
 
         int totalGiven = 0;
         for (Player player : Players.getOnline()) {
@@ -80,7 +85,7 @@ public class KeyGiveAllCommand implements KeyCommand {
             }
 
             // If adding the key to the player succeeded, handle the feedback unless the silent flag is set.
-            if (!context.hasFlag(FLAG_SILENT)) {
+            if (!silent) {
                 result.handleFeedback((locale, actionContext) -> {
                     this.dispatcher.sendBase(player, key, KeyLang.KEY_GIVE_NOTIFY, ctx -> ctx
                         .apply(actionContext)
@@ -91,7 +96,7 @@ public class KeyGiveAllCommand implements KeyCommand {
             totalGiven += amount;
         }
 
-        if (!context.hasFlag(FLAG_SILENT_FEEDBACK)) {
+        if (!silentFeedback) {
             int finalTotalGiven = totalGiven;
             this.dispatcher.sendBase(sender, key, KeyLang.KEY_GIVE_ALL_FEEDBACK, ctx -> ctx
                 .with(CommonPlaceholders.GENERIC_AMOUNT, () -> NumberUtil.format(amount))

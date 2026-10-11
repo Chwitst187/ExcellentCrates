@@ -17,6 +17,10 @@ public final class CratesLang implements LangContainer {
         .builder("crates.command.root.description")
         .text("Crates root command.");
 
+    public static final TextLocale COMMAND_RELOAD_DESCRIPTION = LangEntry
+        .builder("crates.command.reload.description")
+        .text("Reload the plugin.");
+
     public static final TextLocale COMMAND_EDITOR_DESCRIPTION = LangEntry
         .builder("crates.command.editor.description")
         .text("Crates editor command.");
@@ -24,6 +28,20 @@ public final class CratesLang implements LangContainer {
     public static final TextLocale COMMAND_OPEN_DESCRIPTION = LangEntry
         .builder("crates.command.open.description")
         .text("Open a specific crate remotely.");
+
+    public static final TextLocale COMMAND_OPEN_FOR_DESCRIPTION = LangEntry
+        .builder("crates.command.openfor.description")
+        .text("Open crate for a player.");
+
+    public static final MessageLocale COMMAND_OPEN_FOR_DONE = LangEntry
+        .builder("crates.command.openfor.done")
+        .chatMessage("Opened " + TagWrappers.WHITE.wrap(SharedPlaceholders.CRATE_NAME) + " for " +
+            TagWrappers.WHITE.wrap(CommonPlaceholders.PLAYER_NAME) + "."
+        );
+
+    public static final MessageLocale COMMAND_OPEN_FOR_NOTIFY = LangEntry
+        .builder("crates.command.openfor.notify")
+        .chatMessage("You have been forced to open " + TagWrappers.WHITE.wrap(SharedPlaceholders.CRATE_NAME) + ".");
 
     public static final MessageLocale COMMAND_SYNTAX_INVALID_CRATE_ARGUMENT = LangEntry
         .builder("crates.command.syntax.invalid_crate_argument")

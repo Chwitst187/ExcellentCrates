@@ -31,6 +31,9 @@ public final class KeyLang implements LangContainer {
         .builder("keys.command.giveall.description")
         .text("Gives a key to all players.");
 
+    public static final TextLocale COMMAND_SET_DESCRIPTION = LangEntry
+        .builder("keys.command.set.description")
+        .text("Sets a key balance for a player.");
     public static final TextLocale COMMAND_REMOVE_DESCRIPTION = LangEntry
         .builder("keys.command.remove.description")
         .text("Removes a key from a player.");
@@ -116,6 +119,18 @@ public final class KeyLang implements LangContainer {
             TagWrappers.WHITE.wrap(SharedPlaceholders.KEY_NAME) + "."
         );
 
+    public static final MessageLocale KEY_SET_FEEDBACK = LangEntry
+        .builder("keys.key.set.feedback")
+        .chatMessage("You set " + TagWrappers.WHITE.wrap("x" + CommonPlaceholders.GENERIC_AMOUNT) + " " +
+            TagWrappers.WHITE.wrap(SharedPlaceholders.KEY_NAME) + " for " +
+            TagWrappers.WHITE.wrap(CommonPlaceholders.PLAYER_NAME) + "."
+        );
+
+    public static final MessageLocale KEY_SET_NOTIFY = LangEntry
+        .builder("keys.key.set.notify")
+        .chatMessage("Your " + TagWrappers.WHITE.wrap(SharedPlaceholders.KEY_NAME) + " amount has been set to " +
+            TagWrappers.WHITE.wrap("x" + CommonPlaceholders.GENERIC_AMOUNT) + "."
+        );
     public static final MessageLocale KEY_REMOVE_FEEDBACK = LangEntry
         .builder("keys.key.remove.feedback")
         .chatMessage("You removed " + TagWrappers.WHITE.wrap("x" + CommonPlaceholders.GENERIC_AMOUNT) + " " +

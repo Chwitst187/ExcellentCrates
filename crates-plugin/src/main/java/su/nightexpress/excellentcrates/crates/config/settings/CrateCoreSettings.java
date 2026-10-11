@@ -31,7 +31,7 @@ public record CrateCoreSettings(CrateModuleSettings modules, String[] commandAli
         static final ConfigProperty<String[]> COMMAND_ALIASES = ConfigProperty.of(
             ConfigCodecs.STRING_ARRAY,
             "command_aliases",
-            new String[]{"crate", "crates", "case", "cases"},
+            new String[]{"crate", "crates", "case", "cases", "excellentcrates"},
             "The command aliases for crate commands."
         );
 

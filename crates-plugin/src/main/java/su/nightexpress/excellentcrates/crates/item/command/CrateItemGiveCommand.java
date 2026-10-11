@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NullMarked;
 
-import su.nightexpress.engine.action.ActionResult;
 import su.nightexpress.excellentcrates.api.crate.Crate;
 import su.nightexpress.excellentcrates.api.crate.command.CrateCommand;
 import su.nightexpress.excellentcrates.api.crate.dispatcher.CrateFeedbackHandler;
@@ -30,6 +29,11 @@ public class CrateItemGiveCommand implements CrateCommand, CrateFeedbackHandler 
     private static final String ARGUMENT_PLAYER = "player";
     private static final String ARGUMENT_CRATE  = "crate";
     private static final String ARGUMENT_AMOUNT = "amount";
+
+    private static final String FLAG_SILENT               = "s";
+    private static final String FLAG_SILENT_LONG          = "silent";
+    private static final String FLAG_SILENT_FEEDBACK      = "sf";
+    private static final String FLAG_SILENT_FEEDBACK_LONG = "silentfeedback";
 
     private final CrateItemService       itemService;
     private final CrateMessageDispatcher dispatcher;
@@ -57,6 +61,7 @@ public class CrateItemGiveCommand implements CrateCommand, CrateFeedbackHandler 
                     .suggestions((reader, context) -> Lists.newList("1", "5", "10"))
                     .optional()
             )
+            .withFlags(FLAG_SILENT, FLAG_SILENT_LONG, FLAG_SILENT_FEEDBACK, FLAG_SILENT_FEEDBACK_LONG)
             .executes(this::run)
         );
     }
@@ -68,13 +73,27 @@ public class CrateItemGiveCommand implements CrateCommand, CrateFeedbackHandler 
         Crate crate = arguments.get(ARGUMENT_CRATE, Crate.class);
         int amount = arguments.getInt(ARGUMENT_AMOUNT, 1);
 
+        boolean silent = context.hasFlag(FLAG_SILENT) || context.hasFlag(FLAG_SILENT_LONG);
+        boolean silentFeedback = context.hasFlag(FLAG_SILENT_FEEDBACK) || context.hasFlag(FLAG_SILENT_FEEDBACK_LONG);
+
         ItemStack itemStack = this.itemService.createTaggedItem(crate);
         itemStack.setAmount(amount);
         Players.addItem(player, itemStack);
 
-        return this.handleFeedbackBase(sender, crate, ActionResult.ok(CrateItemLang.COMMAND_GET_FEEDBACK, ctx -> ctx
-            .with(CommonPlaceholders.GENERIC_AMOUNT, () -> NumberUtil.format(amount))
-            .with(CommonPlaceholders.PLAYER.resolver(player))
-        ));
+        if (!silent) {
+            this.dispatcher.sendBase(player, crate, CrateItemLang.COMMAND_GET_FEEDBACK, ctx -> ctx
+                .with(CommonPlaceholders.GENERIC_AMOUNT, () -> NumberUtil.format(amount))
+                .with(CommonPlaceholders.PLAYER.resolver(player))
+            );
+        }
+
+        if (!silentFeedback && (!context.isPlayer() || !context.getPlayerOrThrow().equals(player))) {
+            this.dispatcher.sendBase(sender, crate, CrateItemLang.COMMAND_GIVE_FEEDBACK, ctx -> ctx
+                .with(CommonPlaceholders.GENERIC_AMOUNT, () -> NumberUtil.format(amount))
+                .with(CommonPlaceholders.PLAYER_NAME, player::getName)
+            );
+        }
+
+        return true;
     }
 }

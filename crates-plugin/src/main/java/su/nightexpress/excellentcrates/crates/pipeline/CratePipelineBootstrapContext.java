@@ -12,6 +12,7 @@ import su.nightexpress.excellentcrates.api.crate.pipeline.PipelineExecutor;
 import su.nightexpress.excellentcrates.api.crate.pipeline.PipelineProcessor;
 import su.nightexpress.excellentcrates.api.crate.pipeline.RegisteredPipelineStage;
 import su.nightexpress.excellentcrates.crates.pipeline.command.CrateOpenCommand;
+import su.nightexpress.excellentcrates.crates.pipeline.command.CrateOpenForCommand;
 import su.nightexpress.excellentcrates.crates.pipeline.interact.CratePipelineInteractAction;
 
 @NullMarked
@@ -26,6 +27,7 @@ public final class CratePipelineBootstrapContext extends NamedBootstrapContext {
 
     public final CratePipelineInteractAction interactAction;
     public final CrateOpenCommand            crateCommand;
+    public final CrateOpenForCommand         openForCommand;
 
     public final PipelineAPI api;
 
@@ -40,6 +42,7 @@ public final class CratePipelineBootstrapContext extends NamedBootstrapContext {
 
         this.interactAction = new CratePipelineInteractAction(pipeline);
         this.crateCommand = new CrateOpenCommand(pipeline, dispatcher);
+        this.openForCommand = new CrateOpenForCommand(pipeline, dispatcher);
 
         this.api = new DefaultPipelineAPI(this.stages, this.executors, this.processors, pipeline);
     }

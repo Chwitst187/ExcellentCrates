@@ -33,6 +33,11 @@ public class KeyGiveCommand implements KeyCommand {
     private static final String ARGUMENT_KEY    = "key";
     private static final String ARGUMENT_AMOUNT = "amount";
 
+    private static final String FLAG_SILENT               = "s";
+    private static final String FLAG_SILENT_LONG          = "silent";
+    private static final String FLAG_SILENT_FEEDBACK      = "sf";
+    private static final String FLAG_SILENT_FEEDBACK_LONG = "silentfeedback";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyGiveCommand.class);
 
     private final KeyBalanceService    balanceService;
@@ -59,6 +64,7 @@ public class KeyGiveCommand implements KeyCommand {
                     .optional()
                     .suggestions((reader, context) -> List.of("1", "5", "10"))
             )
+            .withFlags(FLAG_SILENT, FLAG_SILENT_LONG, FLAG_SILENT_FEEDBACK, FLAG_SILENT_FEEDBACK_LONG)
             .executes(this::run)
         );
     }
@@ -68,6 +74,9 @@ public class KeyGiveCommand implements KeyCommand {
         CrateKey key = arguments.get(ARGUMENT_KEY, CrateKey.class);
         int amount = arguments.getInt(ARGUMENT_AMOUNT, 1);
         CommandSender sender = context.getSender();
+
+        boolean silent = context.hasFlag(FLAG_SILENT) || context.hasFlag(FLAG_SILENT_LONG);
+        boolean silentFeedback = context.hasFlag(FLAG_SILENT_FEEDBACK) || context.hasFlag(FLAG_SILENT_FEEDBACK_LONG);
 
         this.userDataService.loadByNameAndCacheAsync(playerName).thenCompose(opt -> {
             if (opt.isEmpty()) {
@@ -79,12 +88,14 @@ public class KeyGiveCommand implements KeyCommand {
 
             return this.balanceService.giveKeyAsync(userData.getId(), key, amount).thenAccept(result -> {
                 result.handleFeedback((locale, actionContext) -> {
-                    this.dispatcher.sendBase(sender, key, locale, builder -> builder
-                        .apply(actionContext)
-                        .with(CommonPlaceholders.PLAYER_NAME, userData::getName)
-                    );
+                    if (!silentFeedback && (context.getPlayer() == null || !context.getPlayer().getUniqueId().equals(userData.getId()))) {
+                        this.dispatcher.sendBase(sender, key, locale, builder -> builder
+                            .apply(actionContext)
+                            .with(CommonPlaceholders.PLAYER_NAME, userData::getName)
+                        );
+                    }
 
-                    if (result.success()) {
+                    if (result.success() && !silent) {
                         Players.findById(userData.getId()).ifPresent(target -> {
                             this.dispatcher.sendBase(target, key, KeyLang.KEY_GIVE_NOTIFY, actionContext);
                         });

@@ -33,6 +33,7 @@ import su.nightexpress.excellentcrates.engine.database.DatabaseBootstrapContext;
 import su.nightexpress.excellentcrates.engine.dispatcher.DefaultCrateMessageDispatcher;
 import su.nightexpress.excellentcrates.engine.module.ModuleBootstrapContext;
 import su.nightexpress.excellentcrates.integration.papi.PlaceholderAPIConfiguration;
+import su.nightexpress.excellentcrates.permission.LegacyPermissions;
 import su.nightexpress.nightcore.NightPlugin;
 import su.nightexpress.nightcore.bridge.key.KeyDomain;
 import su.nightexpress.nightcore.config.PluginDetails;
@@ -121,6 +122,7 @@ public class ExcellentCratesPlugin extends NightPlugin implements CratesPlugin {
         this.core.start();
 
         this.registerPermissions(Perms.ROOT);
+        LegacyPermissions.setup(this.getPluginManager());
 
         PluginAPIConfiguration.configure(this, services);
     }

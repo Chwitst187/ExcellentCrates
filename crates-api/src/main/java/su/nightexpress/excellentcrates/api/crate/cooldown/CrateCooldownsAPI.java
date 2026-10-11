@@ -1,12 +1,14 @@
 package su.nightexpress.excellentcrates.api.crate.cooldown;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import su.nightexpress.engine.id.Identifier;
 import su.nightexpress.excellentcrates.api.common.cooldown.CooldownTimestamp;
 import su.nightexpress.excellentcrates.api.crate.Crate;
 
@@ -25,4 +27,6 @@ public interface CrateCooldownsAPI {
     CooldownTimestamp getExpirationTimestamp(Player player, Crate crate);
 
     void applyCooldowns(Player player, Crate crate);
+
+    void resetCooldown(UUID playerId, Identifier crateId);
 }

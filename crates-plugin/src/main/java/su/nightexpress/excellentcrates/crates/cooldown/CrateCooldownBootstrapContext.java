@@ -7,17 +7,18 @@ import org.jspecify.annotations.NullMarked;
 
 import su.nightexpress.engine.bootstrap.context.NamedBootstrapContext;
 import su.nightexpress.engine.component.DatabaseClient;
-import su.nightexpress.engine.dispatcher.MessageDispatcher;
 import su.nightexpress.engine.id.Identifier;
 import su.nightexpress.engine.ui.CoreUIService;
 import su.nightexpress.excellentcrates.api.CratesPlugin;
 import su.nightexpress.excellentcrates.api.crate.cooldown.CrateCooldownsAPI;
 import su.nightexpress.excellentcrates.api.crate.data.extension.CrateDataExtension;
+import su.nightexpress.excellentcrates.api.crate.dispatcher.CrateMessageDispatcher;
 import su.nightexpress.excellentcrates.api.crate.editor.CrateEditorExtension;
 import su.nightexpress.excellentcrates.api.crate.placeholder.CratePlaceholder;
 import su.nightexpress.excellentcrates.api.crate.placeholder.CratePlaceholders;
 import su.nightexpress.excellentcrates.api.crate.quota.CrateQuotaProcessor;
 import su.nightexpress.excellentcrates.api.crate.registry.CrateResolver;
+import su.nightexpress.excellentcrates.crates.cooldown.command.CrateResetCooldownCommand;
 import su.nightexpress.excellentcrates.crates.cooldown.component.StandardCrateCooldownComponent;
 import su.nightexpress.excellentcrates.crates.cooldown.component.codec.CrateCooldownsCodec;
 import su.nightexpress.excellentcrates.crates.cooldown.component.extension.CrateCooldownsLifecycleExtension;
@@ -32,6 +33,7 @@ import su.nightexpress.excellentcrates.crates.cooldown.lang.CrateCooldownsLang;
 import su.nightexpress.excellentcrates.crates.cooldown.placeholder.CrateCooldownPlaceholder;
 import su.nightexpress.excellentcrates.crates.cooldown.quota.CrateCooldownQuotaProcessor;
 import su.nightexpress.nightcore.configuration.codec.ConfigCodecs;
+import su.nightexpress.nightcore.userdata.UserDataManager;
 
 @NullMarked
 public final class CrateCooldownBootstrapContext extends NamedBootstrapContext {
@@ -45,6 +47,7 @@ public final class CrateCooldownBootstrapContext extends NamedBootstrapContext {
     public final CrateCooldownsAPI    api;
 
     private final CrateCooldownsEditorBootstrapContext editorContext;
+    private final CrateResetCooldownCommand            resetCooldownCommand;
 
     private final CrateDataExtension  dataExtension;
     private final CrateQuotaProcessor quotaProcessor;
@@ -53,9 +56,10 @@ public final class CrateCooldownBootstrapContext extends NamedBootstrapContext {
     public CrateCooldownBootstrapContext(CratesPlugin plugin,
                                          DatabaseClient databaseClient,
                                          CoreUIService coreUI,
-                                         MessageDispatcher dispatcher,
+                                         CrateMessageDispatcher dispatcher,
                                          CrateResolver crateResolver,
-                                         CratePlaceholders cratePlaceholders) {
+                                         CratePlaceholders cratePlaceholders,
+                                         UserDataManager userDataService) {
         super(BUNDLE_ID, BUNDLE_NAME);
         plugin.injectLang(CrateCooldownsLang.class);
 
@@ -74,6 +78,8 @@ public final class CrateCooldownBootstrapContext extends NamedBootstrapContext {
             plugin, coreUI, dispatcher, crateResolver, cratePlaceholders
         );
 
+        this.resetCooldownCommand = new CrateResetCooldownCommand(this.cooldownService, userDataService, dispatcher);
+
         this.api = new DefaultCrateCooldownsAPI(this.cooldownService);
 
         this.dataExtension = new CrateCooldownsLifecycleExtension(cacheService);
@@ -84,6 +90,10 @@ public final class CrateCooldownBootstrapContext extends NamedBootstrapContext {
         this.addComponent(new CrateCooldownSaveController(plugin, cacheService, dbSettings.dataSaveInterval()));
         this.addComponent(new CrateCooldownPlayerSessionController(plugin, cacheService));
         this.addComponent(this.editorContext);
+    }
+
+    public CrateResetCooldownCommand getResetCooldownCommand() {
+        return this.resetCooldownCommand;
     }
 
     public CrateDataExtension getDataExtension() {

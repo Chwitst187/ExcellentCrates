@@ -1,6 +1,7 @@
 package su.nightexpress.excellentcrates.keys.permission;
 
 import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.jspecify.annotations.NullMarked;
 
 import su.nightexpress.excellentcrates.core.permission.Perms;
@@ -21,8 +22,9 @@ public final class KeyPerms {
     public static final Permission COMMAND_BALANCE_OTHERS    = COMMAND.create("balance.others");
     public static final Permission COMMAND_GET               = COMMAND.create("get");
     public static final Permission COMMAND_GIVE              = COMMAND.create("give");
+    public static final Permission COMMAND_SET               = COMMAND.create("set");
     public static final Permission COMMAND_GIVE_ALL          = COMMAND.create("giveall");
-    public static final Permission COMMAND_GIVE_ALL_INCLUDED = COMMAND.create("giveall.included");
+    public static final Permission COMMAND_GIVE_ALL_INCLUDED = COMMAND.create("giveall.included", PermissionDefault.TRUE);
     public static final Permission COMMAND_DROP              = COMMAND.create("drop");
     public static final Permission COMMAND_REMOVE            = COMMAND.create("remove");
     public static final Permission COMMAND_REDEEM            = COMMAND.create("redeem");

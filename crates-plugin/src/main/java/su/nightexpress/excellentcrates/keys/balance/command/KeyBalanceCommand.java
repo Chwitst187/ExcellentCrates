@@ -31,8 +31,10 @@ import su.nightexpress.nightcore.util.placeholder.CommonPlaceholders;
 @NullMarked
 public class KeyBalanceCommand implements KeyCommand {
 
+    private static final String DEFAULT_NAME    = "balance";
     private static final String ARGUMENT_PLAYER = "player";
 
+    private final String               name;
     private final KeyRegistry          keyRegistry;
     private final KeyBalanceService    balanceService;
     private final UserDataManager      userDataService;
@@ -42,6 +44,15 @@ public class KeyBalanceCommand implements KeyCommand {
                              KeyBalanceService balanceService,
                              UserDataManager userDataService,
                              KeyMessageDispatcher dispatcher) {
+        this(DEFAULT_NAME, keyRegistry, balanceService, userDataService, dispatcher);
+    }
+
+    public KeyBalanceCommand(String name,
+                             KeyRegistry keyRegistry,
+                             KeyBalanceService balanceService,
+                             UserDataManager userDataService,
+                             KeyMessageDispatcher dispatcher) {
+        this.name = name;
         this.keyRegistry = keyRegistry;
         this.balanceService = balanceService;
         this.userDataService = userDataService;
@@ -53,7 +64,7 @@ public class KeyBalanceCommand implements KeyCommand {
 
     @Override
     public ExecutableNode createCommand() {
-        return Commands.literal("balance", builder -> builder
+        return Commands.literal(this.name, builder -> builder
             .description(KeyLang.COMMAND_BALANCE_DESCRIPTION)
             .permission(KeyPerms.COMMAND_BALANCE)
             .withArguments(Arguments.playerName(ARGUMENT_PLAYER)

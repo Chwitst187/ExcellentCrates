@@ -13,10 +13,12 @@ public final class CratePerms {
 
     public static final PermissionNamespace EDITOR = ROOT.namespace("editor");
 
-    public static final Permission COMMAND_ROOT        = COMMAND.create("root");
-    public static final Permission COMMAND_EDITOR      = COMMAND.create("editor");
-    public static final Permission COMMAND_OPEN        = COMMAND.create("open");
-    public static final Permission COMMAND_OPEN_OTHERS = COMMAND.create("open.others");
+    public static final Permission COMMAND_ROOT           = COMMAND.create("root");
+    public static final Permission COMMAND_EDITOR         = COMMAND.create("editor");
+    public static final Permission COMMAND_OPEN           = COMMAND.create("open");
+    public static final Permission COMMAND_OPEN_OTHERS    = COMMAND.create("open.others");
+    public static final Permission COMMAND_OPEN_FOR       = COMMAND.create("openfor");
+    public static final Permission COMMAND_RESET_COOLDOWN = COMMAND.create("resetcooldown");
 
     public static final Permission EDITOR_CORE = EDITOR.create("core");
 

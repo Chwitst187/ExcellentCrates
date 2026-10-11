@@ -96,4 +96,14 @@ public class DefaultKeyBalanceAPI implements KeyBalanceAPI {
     public CompletableFuture<ActionResult> removeKeyAsync(UUID playerId, CrateKey key, int amount) {
         return balanceService.removeKeyAsync(playerId, key, amount);
     }
+
+    @Override
+    public ActionResult setKey(Player player, CrateKey key, int amount) {
+        return this.balanceService.setKey(player, key, amount);
+    }
+
+    @Override
+    public CompletableFuture<ActionResult> setKeyAsync(UUID playerId, CrateKey key, int amount) {
+        return this.balanceService.setKeyAsync(playerId, key, amount);
+    }
 }

@@ -283,4 +283,63 @@ public final class KeyBalanceService {
             });
         }
     }
+
+    public ActionResult setKey(Player player, CrateKey key, int amount) {
+        boolean virtual = key.getBase().isVirtual();
+        int targetAmount = Math.max(0, amount);
+
+        if (virtual) {
+            Identifier keyId = key.getId();
+
+            StoredKey storedKey = this.storageService.getCachedOrCreate(
+                player.getUniqueId(), keyId, CacheStrategy.PERMANENT
+            );
+            storedKey.setVirtualBalance(targetAmount);
+            this.storageService.markDirty(storedKey);
+        }
+        else {
+            int current = this.countPhysicalKeys(player, key);
+            int diff = targetAmount - current;
+            if (diff > 0) {
+                this.addKey(player, key, diff);
+            }
+            else if (diff < 0) {
+                this.removeFromInventory(player, key, -diff);
+            }
+        }
+
+        return ActionResult.ok(KeyLang.KEY_SET_FEEDBACK, ctx -> ctx
+            .with(CommonPlaceholders.GENERIC_AMOUNT, () -> NumberUtil.format(targetAmount))
+        );
+    }
+
+    public CompletableFuture<ActionResult> setKeyAsync(UUID playerId, CrateKey key, int amount) {
+        Identifier keyId = key.getId();
+        int targetAmount = Math.max(0, amount);
+        boolean virtual = key.getBase().isVirtual();
+
+        ActionResult success = ActionResult.ok(KeyLang.KEY_SET_FEEDBACK, ctx -> ctx
+            .with(CommonPlaceholders.GENERIC_AMOUNT, () -> NumberUtil.format(targetAmount))
+        );
+
+        if (virtual) {
+            return this.storageService.updateDataAndCreateIfAbsentAsync(playerId, keyId, CacheStrategy.TEMPORARY,
+                storedKey -> {
+                    storedKey.setVirtualBalance(targetAmount);
+                    return success;
+                });
+        }
+        else {
+            Player player = Players.getPlayer(playerId);
+            if (player != null) {
+                return CompletableFuture.completedFuture(this.setKey(player, key, targetAmount));
+            }
+
+            return this.storageService.updateDataAndCreateIfAbsentAsync(playerId, keyId, CacheStrategy.TEMPORARY,
+                storedKey -> {
+                    storedKey.setUnclaimedAmount(targetAmount);
+                    return success;
+                });
+        }
+    }
 }

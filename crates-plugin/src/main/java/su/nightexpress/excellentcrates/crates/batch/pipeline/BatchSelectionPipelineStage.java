@@ -38,8 +38,10 @@ public class BatchSelectionPipelineStage implements PipelineStage {
         boolean fastOpen = context.hasComponent(PipelineComponentKeys.FAST_OPEN);
         int maxAllowed = batchComponent.getMaxAllowed();
 
-        if (fastOpen) {
-            batchComponent.setSelectedAmount(maxAllowed);
+        if (fastOpen || batchComponent.getSelectedAmount() > 0) {
+            if (batchComponent.getSelectedAmount() <= 0) {
+                batchComponent.setSelectedAmount(maxAllowed);
+            }
             chain.proceed(player, context);
             return;
         }

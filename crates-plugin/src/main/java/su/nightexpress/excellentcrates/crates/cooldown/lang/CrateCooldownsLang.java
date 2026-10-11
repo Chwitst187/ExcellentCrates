@@ -15,6 +15,16 @@ import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
 @NullMarked
 public final class CrateCooldownsLang implements LangContainer {
 
+    public static final TextLocale COMMAND_RESET_COOLDOWN_DESCRIPTION = LangEntry
+        .builder("crates.cooldowns.command.resetcooldown.description")
+        .text("Reset crate cooldown for a player.");
+
+    public static final MessageLocale COMMAND_RESET_COOLDOWN_FEEDBACK = LangEntry
+        .builder("crates.cooldowns.command.resetcooldown.feedback")
+        .chatMessage("Cooldown of " + TagWrappers.WHITE.wrap(SharedPlaceholders.CRATE_NAME) + " has been reset for " +
+            TagWrappers.WHITE.wrap(CommonPlaceholders.PLAYER_NAME) + "."
+        );
+
     public static final MessageLocale QUOTA_COOLDOWN = LangEntry
         .builder("crates.cooldown.quota.cooldown")
         .chatMessage(Sound.ENTITY_VILLAGER_NO,

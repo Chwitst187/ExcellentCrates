@@ -29,12 +29,20 @@ import su.nightexpress.nightcore.util.placeholder.CommonPlaceholders;
 @NullMarked
 public class KeyRemoveCommand implements KeyCommand {
 
+    private static final String DEFAULT_NAME = "remove";
+
     private static final String ARGUMENT_PLAYER = "player";
     private static final String ARGUMENT_KEY    = "key";
     private static final String ARGUMENT_AMOUNT = "amount";
 
+    private static final String FLAG_SILENT               = "s";
+    private static final String FLAG_SILENT_LONG          = "silent";
+    private static final String FLAG_SILENT_FEEDBACK      = "sf";
+    private static final String FLAG_SILENT_FEEDBACK_LONG = "silentfeedback";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyRemoveCommand.class);
 
+    private final String               name;
     private final KeyBalanceService    balanceService;
     private final UserDataManager      userDataService;
     private final KeyMessageDispatcher dispatcher;
@@ -42,6 +50,14 @@ public class KeyRemoveCommand implements KeyCommand {
     public KeyRemoveCommand(KeyBalanceService balanceService,
                             UserDataManager userDataService,
                             KeyMessageDispatcher dispatcher) {
+        this(DEFAULT_NAME, balanceService, userDataService, dispatcher);
+    }
+
+    public KeyRemoveCommand(String name,
+                            KeyBalanceService balanceService,
+                            UserDataManager userDataService,
+                            KeyMessageDispatcher dispatcher) {
+        this.name = name;
         this.balanceService = balanceService;
         this.userDataService = userDataService;
         this.dispatcher = dispatcher;
@@ -49,7 +65,7 @@ public class KeyRemoveCommand implements KeyCommand {
 
     @Override
     public ExecutableNode createCommand() {
-        return Commands.literal("remove", builder -> builder
+        return Commands.literal(this.name, builder -> builder
             .description(KeyLang.COMMAND_REMOVE_DESCRIPTION)
             .permission(KeyPerms.COMMAND_REMOVE)
             .withArguments(
@@ -59,6 +75,7 @@ public class KeyRemoveCommand implements KeyCommand {
                     .optional()
                     .suggestions((reader, context) -> List.of("1", "5", "10"))
             )
+            .withFlags(FLAG_SILENT, FLAG_SILENT_LONG, FLAG_SILENT_FEEDBACK, FLAG_SILENT_FEEDBACK_LONG)
             .executes(this::run)
         );
     }
@@ -68,6 +85,9 @@ public class KeyRemoveCommand implements KeyCommand {
         CrateKey key = arguments.get(ARGUMENT_KEY, CrateKey.class);
         int amount = arguments.getInt(ARGUMENT_AMOUNT, 1);
         CommandSender sender = context.getSender();
+
+        boolean silent = context.hasFlag(FLAG_SILENT) || context.hasFlag(FLAG_SILENT_LONG);
+        boolean silentFeedback = context.hasFlag(FLAG_SILENT_FEEDBACK) || context.hasFlag(FLAG_SILENT_FEEDBACK_LONG);
 
         this.userDataService.loadByNameAndCacheAsync(playerName).thenCompose(opt -> {
             if (opt.isEmpty()) {
@@ -79,14 +99,16 @@ public class KeyRemoveCommand implements KeyCommand {
 
             return this.balanceService.removeKeyAsync(userData.getId(), key, amount).thenAccept(result -> {
                 result.handleFeedback((locale, actionContext) -> {
-                    this.dispatcher.sendBase(sender, key, locale, builder -> builder
-                        .apply(actionContext)
-                        .with(CommonPlaceholders.PLAYER_NAME, userData::getName)
-                    );
+                    if (!silentFeedback && (context.getPlayer() == null || !context.getPlayer().getUniqueId().equals(userData.getId()))) {
+                        this.dispatcher.sendBase(sender, key, locale, builder -> builder
+                            .apply(actionContext)
+                            .with(CommonPlaceholders.PLAYER_NAME, userData::getName)
+                        );
+                    }
 
-                    if (result.success()) {
+                    if (result.success() && !silent) {
                         Players.findById(userData.getId()).ifPresent(target -> {
-                            this.dispatcher.sendBase(target, key, KeyLang.KEY_GIVE_NOTIFY, actionContext);
+                            this.dispatcher.sendBase(target, key, KeyLang.KEY_REMOVE_NOTIFY, actionContext);
                         });
                     }
                 });

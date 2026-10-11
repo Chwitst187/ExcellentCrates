@@ -19,6 +19,7 @@ import su.nightexpress.excellentcrates.keys.balance.command.KeyGiveAllCommand;
 import su.nightexpress.excellentcrates.keys.balance.command.KeyGiveCommand;
 import su.nightexpress.excellentcrates.keys.balance.command.KeyRedeemCommand;
 import su.nightexpress.excellentcrates.keys.balance.command.KeyRemoveCommand;
+import su.nightexpress.excellentcrates.keys.balance.command.KeySetCommand;
 import su.nightexpress.excellentcrates.keys.balance.controller.KeyAutoRedeemController;
 import su.nightexpress.excellentcrates.keys.balance.placeholder.KeyBalancePlaceholder;
 import su.nightexpress.excellentcrates.keys.item.KeyItemService;
@@ -51,9 +52,12 @@ public class KeyBalanceBootstrapContext extends NamedBootstrapContext {
         this.placeholder = new KeyBalancePlaceholder(this.balanceService);
 
         this.commands.add(new KeyGiveCommand(this.balanceService, userDataService, dispatcher));
+        this.commands.add(new KeySetCommand(this.balanceService, userDataService, dispatcher));
         this.commands.add(new KeyRemoveCommand(this.balanceService, userDataService, dispatcher));
+        this.commands.add(new KeyRemoveCommand("take", this.balanceService, userDataService, dispatcher));
         this.commands.add(new KeyGiveAllCommand(this.balanceService, dispatcher));
         this.commands.add(new KeyBalanceCommand(keyRegistry, balanceService, userDataService, dispatcher));
+        this.commands.add(new KeyBalanceCommand("inspect", keyRegistry, balanceService, userDataService, dispatcher));
         this.commands.add(new KeyRedeemCommand(keyRegistry, balanceService, dispatcher));
 
         this.api = new DefaultKeyBalanceAPI(this.balanceService);

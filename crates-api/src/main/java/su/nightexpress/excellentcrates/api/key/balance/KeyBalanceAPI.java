@@ -42,4 +42,8 @@ public interface KeyBalanceAPI {
     ActionResult removeKey(Player player, CrateKey key, int amount);
 
     CompletableFuture<ActionResult> removeKeyAsync(UUID playerId, CrateKey key, int amount);
+
+    ActionResult setKey(Player player, CrateKey key, int amount);
+
+    CompletableFuture<ActionResult> setKeyAsync(UUID playerId, CrateKey key, int amount);
 }

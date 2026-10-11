@@ -35,6 +35,7 @@ import su.nightexpress.excellentcrates.crates.open.CrateOpenActionsBootstrapCont
 import su.nightexpress.excellentcrates.crates.pipeline.CratePipelineBootstrapContext;
 import su.nightexpress.excellentcrates.crates.placeholder.CratePlaceholderAPIResolver;
 import su.nightexpress.excellentcrates.crates.quota.CrateQuotaBootstrapContext;
+import su.nightexpress.nightcore.userdata.UserDataManager;
 
 @NullMarked
 public final class CratesModuleBootstrap extends BaseModuleBootstrap {
@@ -44,6 +45,7 @@ public final class CratesModuleBootstrap extends BaseModuleBootstrap {
         CoreUIService coreUI = dependencies.uiService();
         CrateMessageDispatcher dispatcher = dependencies.dispatcher();
         DatabaseClient databaseClient = dependencies.databaseClient();
+        UserDataManager userDataService = dependencies.userService();
 
         CrateRegistry crates = dependencies.crateRegistry();
         CratePlaceholders cratePlaceholders = dependencies.cratePlaceholders();
@@ -58,7 +60,7 @@ public final class CratesModuleBootstrap extends BaseModuleBootstrap {
 
         CratesConfigBootstrapContext configContext = new CratesConfigBootstrapContext(plugin);
         CrateDataContext dataContext = new CrateDataContext(plugin, crates, configContext.settings);
-        CrateCommandsContext commandsContext = new CrateCommandsContext(plugin, crates, configContext.settings);
+        CrateCommandsContext commandsContext = new CrateCommandsContext(plugin, crates, configContext.settings, dispatcher);
         CrateQuotaBootstrapContext quotaContext = new CrateQuotaBootstrapContext(dispatcher);
         CratePipelineBootstrapContext pipelineContext = new CratePipelineBootstrapContext(dispatcher);
         InteractionBootstrapContext interactionContext = new InteractionBootstrapContext(plugin);
@@ -102,6 +104,7 @@ public final class CratesModuleBootstrap extends BaseModuleBootstrap {
         commandsContext.commands.registerAll(itemContext.getCommands());
         commandsContext.commands.register(editorContext.editorCommand);
         commandsContext.commands.register(pipelineContext.crateCommand);
+        commandsContext.commands.register(pipelineContext.openForCommand);
 
         editorContext.extensions.register(openingContext.getEditorExtension());
         editorContext.extensions.register(displayEditorContext.getEditorExtension());
@@ -243,7 +246,7 @@ public final class CratesModuleBootstrap extends BaseModuleBootstrap {
 
         if (configContext.modules.cooldownsEnabled()) {
             CrateCooldownBootstrapContext cooldownContext = new CrateCooldownBootstrapContext(
-                plugin, databaseClient, coreUI, dispatcher, crates, cratePlaceholders
+                plugin, databaseClient, coreUI, dispatcher, crates, cratePlaceholders, userDataService
             );
 
             this.registerComponent(cooldownContext);
@@ -252,6 +255,7 @@ public final class CratesModuleBootstrap extends BaseModuleBootstrap {
             dataContext.extensions.register(cooldownContext.getDataExtension());
             quotaContext.quotaProcessors.register(cooldownContext.getQuotaProcessor());
             cratePlaceholders.registerPlaceholder(cooldownContext.getCratePlaceholder());
+            commandsContext.commands.register(cooldownContext.getResetCooldownCommand());
 
             apiBuilder.cooldowns(cooldownContext.api);
         }
