@@ -101,9 +101,7 @@ public final class LegacyPermissions {
         // Include in giveall (default: true for all players)
         Permission legacyGiveAll = getOrCreatePermission(pm, INCLUDE_KEY_GIVEALL, PermissionDefault.TRUE);
         legacyGiveAll.getChildren().put(KeyPerms.COMMAND_GIVE_ALL_INCLUDED.getName(), true);
-        KeyPerms.COMMAND_GIVE_ALL_INCLUDED.getChildren().put(legacyGiveAll.getName(), true);
         legacyGiveAll.recalculatePermissibles();
-        KeyPerms.COMMAND_GIVE_ALL_INCLUDED.recalculatePermissibles();
 
         // Crate root permission hierarchy
         CratePerms.COMMAND_ROOT.getChildren().put(CratePerms.COMMAND_EDITOR.getName(), true);
@@ -187,11 +185,13 @@ public final class LegacyPermissions {
     }
 
     private static void link(PluginManager pm, String legacyName, Permission newPerm) {
+        if (legacyName.equalsIgnoreCase(newPerm.getName())) {
+            return;
+        }
+
         Permission legacyPerm = getOrCreatePermission(pm, legacyName, PermissionDefault.OP);
         legacyPerm.getChildren().put(newPerm.getName(), true);
-        newPerm.getChildren().put(legacyPerm.getName(), true);
         legacyPerm.recalculatePermissibles();
-        newPerm.recalculatePermissibles();
     }
 
     private static Permission getOrCreatePermission(PluginManager pm, String name, PermissionDefault defaultValue) {
