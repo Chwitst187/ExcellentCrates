@@ -60,7 +60,7 @@ public class KeySetCommand implements KeyCommand {
             .withArguments(
                 Arguments.playerName(ARGUMENT_PLAYER),
                 Arguments.argument(ARGUMENT_KEY, CrateKey.class),
-                Arguments.integer(ARGUMENT_AMOUNT, 0)
+                Arguments.integer(ARGUMENT_AMOUNT, 1)
                     .optional()
                     .suggestions((reader, context) -> List.of("1", "5", "10"))
             )

@@ -40,7 +40,7 @@ public record PluginSettings(String prefix, String[] commandAliases) {
         static final ConfigProperty<String[]> COMMAND_ALIASES = ConfigProperty.of(
             ConfigCodecs.STRING_ARRAY,
             "command_aliases",
-            new String[]{"ecrates"},
+            new String[]{"ecratescore", "excellentcratescore"},
             "Settings for the plugin command aliases"
         );
     }

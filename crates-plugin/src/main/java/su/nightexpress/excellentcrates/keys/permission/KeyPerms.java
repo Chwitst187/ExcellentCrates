@@ -14,7 +14,7 @@ public final class KeyPerms {
     public static final PermissionNamespace COMMAND = ROOT.namespace("command");
     public static final PermissionNamespace BYPASS  = ROOT.namespace("bypass");
 
-    public static final Permission AUTO_REDEEM = ROOT.create("auto.redeem");
+    public static final Permission AUTO_REDEEM = ROOT.create("auto.redeem", PermissionDefault.TRUE);
 
     public static final Permission COMMAND_ROOT              = COMMAND.create("root");
     public static final Permission COMMAND_EDITOR            = COMMAND.create("editor");

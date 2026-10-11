@@ -7,7 +7,6 @@ import su.nightexpress.engine.registry.TinyRegistry;
 import su.nightexpress.engine.settings.ReadOnlySettings;
 import su.nightexpress.excellentcrates.api.CratesPlugin;
 import su.nightexpress.excellentcrates.api.crate.command.CrateCommand;
-import su.nightexpress.excellentcrates.core.crate.permission.CratePerms;
 import su.nightexpress.excellentcrates.crates.config.settings.CrateCoreSettings;
 import su.nightexpress.excellentcrates.crates.lang.CratesLang;
 import su.nightexpress.nightcore.commands.command.NightCommand;
@@ -55,7 +54,6 @@ public class CrateCommandRegistrarController implements PluginComponent {
     public void loadCommand() {
         this.command = NightCommand.hub(this.plugin, this.settings.get().commandAliases(), builder -> {
             builder.description(CratesLang.COMMAND_ROOT_DESCRIPTION);
-            builder.permission(CratePerms.COMMAND_ROOT);
 
             this.commands.getEntries().forEach(extension -> {
                 builder.branch(extension.createCommand());

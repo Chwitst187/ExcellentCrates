@@ -3,12 +3,14 @@ package su.nightexpress.excellentcrates.keys.balance;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import su.nightexpress.engine.action.ActionResult;
 import su.nightexpress.engine.cache.CacheStrategy;
 import su.nightexpress.engine.id.Identifier;
+import su.nightexpress.excellentcrates.api.CratesPlugin;
 import su.nightexpress.excellentcrates.api.key.CrateKey;
 import su.nightexpress.excellentcrates.api.key.balance.IKeyBalance;
 import su.nightexpress.excellentcrates.keys.item.KeyItemService;
@@ -21,10 +23,14 @@ import su.nightexpress.nightcore.util.placeholder.CommonPlaceholders;
 
 public final class KeyBalanceService {
 
+    private final CratesPlugin                plugin;
     private final KeyStorageCachedDataService storageService;
     private final KeyItemService              itemService;
 
-    public KeyBalanceService(KeyStorageCachedDataService storageService, KeyItemService itemService) {
+    public KeyBalanceService(CratesPlugin plugin,
+                             KeyStorageCachedDataService storageService,
+                             KeyItemService itemService) {
+        this.plugin = plugin;
         this.storageService = storageService;
         this.itemService = itemService;
     }
@@ -92,7 +98,19 @@ public final class KeyBalanceService {
 
         Player player = Players.getPlayer(playerId);
         if (player != null) {
-            return CompletableFuture.completedFuture(this.getKeyBalance(player, key));
+            if (Bukkit.isPrimaryThread()) {
+                return CompletableFuture.completedFuture(this.getKeyBalance(player, key));
+            }
+            CompletableFuture<IKeyBalance> future = new CompletableFuture<>();
+            this.plugin.runTask(player, () -> {
+                try {
+                    future.complete(this.getKeyBalance(player, key));
+                }
+                catch (Throwable t) {
+                    future.completeExceptionally(t);
+                }
+            });
+            return future;
         }
 
         return this.storageService.loadAndCacheAsync(playerId, keyId, CacheStrategy.TEMPORARY)
@@ -188,7 +206,19 @@ public final class KeyBalanceService {
         else {
             Player player = Players.getPlayer(playerId);
             if (player != null) {
-                return CompletableFuture.completedFuture(this.addKey(player, key, absAmount));
+                if (Bukkit.isPrimaryThread()) {
+                    return CompletableFuture.completedFuture(this.addKey(player, key, absAmount));
+                }
+                CompletableFuture<ActionResult> future = new CompletableFuture<>();
+                this.plugin.runTask(player, () -> {
+                    try {
+                        future.complete(this.addKey(player, key, absAmount));
+                    }
+                    catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
+                return future;
             }
 
             return this.storageService.updateDataAndCreateIfAbsentAsync(playerId, keyId, CacheStrategy.TEMPORARY,
@@ -270,7 +300,19 @@ public final class KeyBalanceService {
         else {
             Player player = Players.getPlayer(playerId);
             if (player != null) {
-                return CompletableFuture.completedFuture(this.removeKey(player, key, amount));
+                if (Bukkit.isPrimaryThread()) {
+                    return CompletableFuture.completedFuture(this.removeKey(player, key, amount));
+                }
+                CompletableFuture<ActionResult> future = new CompletableFuture<>();
+                this.plugin.runTask(player, () -> {
+                    try {
+                        future.complete(this.removeKey(player, key, amount));
+                    }
+                    catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
+                return future;
             }
 
             return this.storageService.updateDataIfExistsAsync(playerId, keyId, CacheStrategy.TEMPORARY, storedKey -> {
@@ -332,7 +374,19 @@ public final class KeyBalanceService {
         else {
             Player player = Players.getPlayer(playerId);
             if (player != null) {
-                return CompletableFuture.completedFuture(this.setKey(player, key, targetAmount));
+                if (Bukkit.isPrimaryThread()) {
+                    return CompletableFuture.completedFuture(this.setKey(player, key, targetAmount));
+                }
+                CompletableFuture<ActionResult> future = new CompletableFuture<>();
+                this.plugin.runTask(player, () -> {
+                    try {
+                        future.complete(this.setKey(player, key, targetAmount));
+                    }
+                    catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                });
+                return future;
             }
 
             return this.storageService.updateDataAndCreateIfAbsentAsync(playerId, keyId, CacheStrategy.TEMPORARY,

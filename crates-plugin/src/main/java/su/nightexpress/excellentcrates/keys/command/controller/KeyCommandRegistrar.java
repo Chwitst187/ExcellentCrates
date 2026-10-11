@@ -10,7 +10,6 @@ import su.nightexpress.excellentcrates.api.CratesPlugin;
 import su.nightexpress.excellentcrates.api.key.command.KeyCommand;
 import su.nightexpress.excellentcrates.keys.config.settings.KeyCoreSettings;
 import su.nightexpress.excellentcrates.keys.lang.KeyLang;
-import su.nightexpress.excellentcrates.keys.permission.KeyPerms;
 import su.nightexpress.nightcore.commands.command.NightCommand;
 
 @NullMarked
@@ -53,7 +52,6 @@ public class KeyCommandRegistrar implements PluginComponent {
     public void start() {
         this.command = NightCommand.hub(plugin, this.settings.get().commandAliases(), builder -> {
             builder.description(KeyLang.COMMAND_ROOT_DESCRIPTION);
-            builder.permission(KeyPerms.COMMAND_ROOT);
 
             for (KeyCommand extension : this.commands.getEntries()) {
                 builder.branch(extension.createCommand());

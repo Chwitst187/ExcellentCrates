@@ -1,6 +1,5 @@
 package su.nightexpress.excellentcrates.keys.command.argument;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.jspecify.annotations.NullMarked;
@@ -29,7 +28,7 @@ public class KeyArgumentType implements ArgumentType<CrateKey>, SuggestionsProvi
 
     @Override
     public CrateKey parse(CommandContextBuilder contextBuilder, String string) throws CommandSyntaxException {
-        Identifier id = IdentifierParser.parse(string)
+        Identifier id = IdentifierParser.parseSanitized(string)
             .orElseThrow(() -> new CommandSyntaxException(Lang.COMMAND_SYNTAX_INVALID_ID, string));
 
         CrateKey key = this.resolver.resolveKey(id);
@@ -42,10 +41,6 @@ public class KeyArgumentType implements ArgumentType<CrateKey>, SuggestionsProvi
 
     @Override
     public List<String> suggest(ArgumentReader reader, CommandContext context) {
-        return this.resolver.keyValues().stream()
-            .map(CrateKey::id)
-            .map(Identifier::toString)
-            .sorted(Comparator.comparing(String::toString))
-            .toList();
+        return this.resolver.keyValues().stream().map(CrateKey::idString).toList();
     }
 }

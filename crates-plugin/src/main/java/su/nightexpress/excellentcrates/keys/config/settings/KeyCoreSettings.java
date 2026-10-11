@@ -33,7 +33,7 @@ public record KeyCoreSettings(String[] commandAliases,
         static final ConfigProperty<String[]> COMMAND_ALIASES = ConfigProperty.of(
             ConfigCodecs.STRING_ARRAY,
             "command_aliases",
-            new String[]{"cratekey", "cratekeys", "ckey", "casekey", "casekeys"},
+            new String[]{"cratekey", "cratekeys", "ckey", "casekey", "casekeys", "key", "keys"},
             "The command aliases for key commands."
         );
 

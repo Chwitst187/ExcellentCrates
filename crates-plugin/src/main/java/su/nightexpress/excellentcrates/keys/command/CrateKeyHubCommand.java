@@ -7,7 +7,6 @@ import org.jspecify.annotations.NullMarked;
 import su.nightexpress.excellentcrates.api.crate.command.CrateCommand;
 import su.nightexpress.excellentcrates.api.key.command.KeyCommand;
 import su.nightexpress.excellentcrates.keys.lang.KeyLang;
-import su.nightexpress.excellentcrates.keys.permission.KeyPerms;
 import su.nightexpress.nightcore.commands.Commands;
 import su.nightexpress.nightcore.commands.tree.ExecutableNode;
 
@@ -24,7 +23,6 @@ public class CrateKeyHubCommand implements CrateCommand {
     public ExecutableNode createCommand() {
         return Commands.hub("key", builder -> {
             builder.description(KeyLang.COMMAND_ROOT_DESCRIPTION);
-            builder.permission(KeyPerms.COMMAND_ROOT);
 
             for (KeyCommand command : this.commands) {
                 builder.branch(command.createCommand());

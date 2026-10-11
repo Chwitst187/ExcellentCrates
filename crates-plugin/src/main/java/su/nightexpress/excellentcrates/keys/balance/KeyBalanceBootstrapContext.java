@@ -47,7 +47,7 @@ public class KeyBalanceBootstrapContext extends NamedBootstrapContext {
         super(ID, NAME);
         this.commands = new ArrayList<>();
 
-        this.balanceService = new KeyBalanceService(storageService, itemService);
+        this.balanceService = new KeyBalanceService(plugin, storageService, itemService);
 
         this.placeholder = new KeyBalancePlaceholder(this.balanceService);
 
@@ -55,7 +55,7 @@ public class KeyBalanceBootstrapContext extends NamedBootstrapContext {
         this.commands.add(new KeySetCommand(this.balanceService, userDataService, dispatcher));
         this.commands.add(new KeyRemoveCommand(this.balanceService, userDataService, dispatcher));
         this.commands.add(new KeyRemoveCommand("take", this.balanceService, userDataService, dispatcher));
-        this.commands.add(new KeyGiveAllCommand(this.balanceService, dispatcher));
+        this.commands.add(new KeyGiveAllCommand(plugin, this.balanceService, dispatcher));
         this.commands.add(new KeyBalanceCommand(keyRegistry, balanceService, userDataService, dispatcher));
         this.commands.add(new KeyBalanceCommand("inspect", keyRegistry, balanceService, userDataService, dispatcher));
         this.commands.add(new KeyRedeemCommand(keyRegistry, balanceService, dispatcher));
