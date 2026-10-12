@@ -84,7 +84,7 @@ public class KeyStorageSQLRepository implements SQLRepository<UUID, Identifier, 
     @Override
     public CompletableFuture<Void> upsert(Collection<StoredKey> data) {
         return CompletableFuture.runAsync(() -> {
-            this.databaseClient.insert(this.keyDataTable, KeyStorageDBSchema.STORED_KEY_INSERT, data);
+            this.databaseClient.insert(this.keyDataTable, KeyStorageDBSchema.STORED_KEY_UPSERT, data);
         });
     }
 }

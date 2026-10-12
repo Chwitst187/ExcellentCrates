@@ -35,12 +35,15 @@ public final class KeyStorageDBSchema {
         return new StoredKey(ownerId, keyId, virtualBalance, unclaimedAmount);
     };
 
-    public static final InsertStatement<StoredKey> STORED_KEY_INSERT = InsertStatement.builder(StoredKey.class)
+    public static final InsertStatement<StoredKey> STORED_KEY_UPSERT = InsertStatement.builder(StoredKey.class)
+        .updateOnConflict()
         .setUUID(OWNER_ID, StoredKey::getOwnerId)
         .setString(KEY_ID, data -> data.getKeyId().value())
         .setInt(VIRTUAL_BALANCE, StoredKey::getVirtualBalance)
         .setInt(UNCLAIMED_AMOUNT, StoredKey::getUnclaimedAmount)
         .build();
+
+    public static final InsertStatement<StoredKey> STORED_KEY_INSERT = STORED_KEY_UPSERT;
 
     public static final SelectStatement<StoredKey> STORED_KEY_SELECT = SelectStatement.builder(STORED_KEY_MAPPER)
         .build();
