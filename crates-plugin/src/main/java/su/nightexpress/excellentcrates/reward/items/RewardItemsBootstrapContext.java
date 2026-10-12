@@ -49,7 +49,7 @@ public class RewardItemsBootstrapContext extends NamedBootstrapContext {
 
         this.dataExtension = new RewardItemsDataExtension();
         this.editorExtension = new RewardItemsEditorExtension(editorUIController);
-        this.grantProcessor = new RewardItemsGrantProcessor();
+        this.grantProcessor = new RewardItemsGrantProcessor(plugin);
 
         this.addComponent(new RewardItemsEditorDialogRegistrar(coreUI, editorUIController));
         this.addComponent(new RewardItemsEditorMenuRegistrar(plugin, coreUI, editorUIController));

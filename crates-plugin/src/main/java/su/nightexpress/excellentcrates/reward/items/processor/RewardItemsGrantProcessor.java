@@ -1,6 +1,6 @@
 package su.nightexpress.excellentcrates.reward.items.processor;
 
-import org.bukkit.Bukkit;
+import su.nightexpress.excellentcrates.api.CratesPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,10 +17,14 @@ import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
 @NullMarked
 public class RewardItemsGrantProcessor implements RewardGrantProcessor {
 
-    private final JavaPlugin plugin;
+    private final CratesPlugin plugin;
+
+    public RewardItemsGrantProcessor(CratesPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     public RewardItemsGrantProcessor() {
-        this.plugin = JavaPlugin.getProvidingPlugin(RewardItemsGrantProcessor.class);
+        this((CratesPlugin) JavaPlugin.getProvidingPlugin(RewardItemsGrantProcessor.class));
     }
 
     @Override
@@ -28,7 +32,7 @@ public class RewardItemsGrantProcessor implements RewardGrantProcessor {
         RewardItemsComponent component = reward.getComponentOrNull(RewardComponentKeys.ITEMS);
         if (component == null || component.isEmpty()) return;
 
-        Bukkit.getScheduler().runTask(this.plugin, () -> {
+        this.plugin.runTask(player, () -> {
             component.getItems().forEach(provider -> {
                 ItemStack itemStack = provider.getItemStack();
                 if (itemStack == null) return;

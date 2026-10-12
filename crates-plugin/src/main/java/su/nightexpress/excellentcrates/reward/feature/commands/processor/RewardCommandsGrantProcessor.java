@@ -3,6 +3,7 @@ package su.nightexpress.excellentcrates.reward.feature.commands.processor;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import su.nightexpress.excellentcrates.api.CratesPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NullMarked;
@@ -21,10 +22,14 @@ import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
 @NullMarked
 public class RewardCommandsGrantProcessor implements RewardGrantProcessor {
 
-    private final JavaPlugin plugin;
+    private final CratesPlugin plugin;
+
+    public RewardCommandsGrantProcessor(CratesPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     public RewardCommandsGrantProcessor() {
-        this.plugin = JavaPlugin.getProvidingPlugin(RewardCommandsGrantProcessor.class);
+        this((CratesPlugin) JavaPlugin.getProvidingPlugin(RewardCommandsGrantProcessor.class));
     }
 
     @Override
@@ -64,7 +69,7 @@ public class RewardCommandsGrantProcessor implements RewardGrantProcessor {
     private void executeBundle(RewardCommandPool bundle, PlaceholderContext placeholders) {
         bundle.getCommands().forEach(command -> {
             String processedCommand = placeholders.apply(command);
-            Bukkit.getScheduler().runTask(this.plugin, () -> {
+            this.plugin.runTask(() -> {
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), processedCommand);
             });
         });

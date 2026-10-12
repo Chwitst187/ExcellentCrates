@@ -76,7 +76,7 @@ public class RewardsModuleBootstrap extends BaseModuleBootstrap {
         RewardQuotaBootstapContext quotaContext = new RewardQuotaBootstapContext();
 
         RewardGrantBootstrapContext grantContext = new RewardGrantBootstrapContext(
-            cratePlaceholders, rewardPlaceholders, dispatcher
+            plugin, cratePlaceholders, rewardPlaceholders, dispatcher
         );
 
         RewardEvaluationBootstrapContext evaluationContext = new RewardEvaluationBootstrapContext(

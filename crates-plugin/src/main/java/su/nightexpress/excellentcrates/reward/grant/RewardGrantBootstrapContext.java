@@ -1,9 +1,11 @@
 package su.nightexpress.excellentcrates.reward.grant;
 
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NullMarked;
 
 import su.nightexpress.engine.registry.SimpleRegistry;
 import su.nightexpress.engine.registry.TinyRegistry;
+import su.nightexpress.excellentcrates.api.CratesPlugin;
 import su.nightexpress.excellentcrates.api.crate.placeholder.CratePlaceholders;
 import su.nightexpress.excellentcrates.api.reward.dispatcher.RewardMessageDispatcher;
 import su.nightexpress.excellentcrates.api.reward.grant.RegisteredGrantProcessor;
@@ -19,7 +21,8 @@ public class RewardGrantBootstrapContext {
 
     private final RewardGrantPipelineExecutor pipelineExecutor;
 
-    public RewardGrantBootstrapContext(CratePlaceholders cratePlaceholders,
+    public RewardGrantBootstrapContext(CratesPlugin plugin,
+                                       CratePlaceholders cratePlaceholders,
                                        RewardPlaceholders rewardPlaceholders,
                                        RewardMessageDispatcher dispatcher) {
         TinyRegistry<RegisteredGrantProcessor> processors = new SimpleRegistry<>();
@@ -29,7 +32,14 @@ public class RewardGrantBootstrapContext {
         );
         this.api = new DefaultRewardGrantAPI(processors, grantService);
 
-        this.pipelineExecutor = new RewardGrantPipelineExecutor(this.grantService);
+        this.pipelineExecutor = new RewardGrantPipelineExecutor(plugin, this.grantService);
+    }
+
+    public RewardGrantBootstrapContext(CratePlaceholders cratePlaceholders,
+                                       RewardPlaceholders rewardPlaceholders,
+                                       RewardMessageDispatcher dispatcher) {
+        this((CratesPlugin) JavaPlugin.getProvidingPlugin(RewardGrantBootstrapContext.class),
+            cratePlaceholders, rewardPlaceholders, dispatcher);
     }
 
     public RewardGrantPipelineExecutor getPipelineExecutor() {
