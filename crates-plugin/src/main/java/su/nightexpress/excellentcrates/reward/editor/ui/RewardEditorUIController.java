@@ -24,9 +24,10 @@ import su.nightexpress.excellentcrates.reward.crate.component.editor.RewardCompo
 import su.nightexpress.excellentcrates.reward.editor.RewardEditorService;
 import su.nightexpress.excellentcrates.reward.editor.context.RewardCreationContext;
 import su.nightexpress.excellentcrates.reward.editor.lang.RewardEditorLang;
-import su.nightexpress.excellentcrates.reward.editor.ui.dialog.context.RewardPreviewDialogContext;
 import su.nightexpress.excellentcrates.reward.editor.ui.dialog.context.RewardDeletionDialogContext;
 import su.nightexpress.excellentcrates.reward.editor.ui.dialog.context.RewardManualCreationDialogContext;
+import su.nightexpress.excellentcrates.reward.editor.ui.dialog.context.RewardPreviewDialogContext;
+import su.nightexpress.excellentcrates.reward.editor.ui.dialog.context.RewardSortDialogContext;
 import su.nightexpress.excellentcrates.reward.editor.ui.dialog.context.RewardWeightDialogContext;
 import su.nightexpress.excellentcrates.reward.editor.ui.menu.context.RewardBrowseMenuContext;
 import su.nightexpress.excellentcrates.reward.editor.ui.menu.context.RewardOptionsMenuContext;
@@ -67,7 +68,8 @@ public class RewardEditorUIController {
 
     }
 
-    public void onBrowseMenuRewardClick(Player player, Reward reward, RewardBrowseMenuContext currentContext) {
+    public void onBrowseMenuRewardClick(Player player, Reward reward, RewardBrowseMenuContext currentContext,
+                                        int page) {
         CrateReference crateRef = currentContext.crateRef();
         RewardReference rewardRef = this.rewardRegistry.createReference(reward);
 
@@ -75,7 +77,7 @@ public class RewardEditorUIController {
         if (crate == null) return;
 
         BackwardNavigator navigator = user -> {
-            this.dispatcher.handleFeedbackBase(user, crate, this.uiService.openBrowseMenu(user, currentContext));
+            this.dispatcher.handleFeedbackBase(user, crate, this.uiService.openBrowseMenu(user, currentContext, page));
         };
 
         RewardComponentHook hook = currentContext.hook();
@@ -131,6 +133,18 @@ public class RewardEditorUIController {
         );
     }
 
+    public void onBrowseMenuSortClick(Player player, RewardBrowseMenuContext currentContext, Runnable refreshUI) {
+        RewardComponentHook hook = currentContext.hook();
+        CrateReference crateRef = currentContext.crateRef();
+        Crate crate = crateRef.get();
+        if (crate == null) return;
+
+        RewardSortDialogContext dialogContext = new RewardSortDialogContext(hook, crateRef);
+        this.dispatcher.handleFeedbackBase(player, crate,
+            this.uiService.showSortDialog(player, dialogContext, refreshUI)
+        );
+    }
+
     public void onOptionsDeleteClick(Player player, RewardOptionsMenuContext currentContext, NightItem icon,
                                      Runnable callback) {
         RewardComponentHook hook = currentContext.hook();
@@ -151,7 +165,6 @@ public class RewardEditorUIController {
     public void onOptionsWeightClick(Player player, RewardOptionsMenuContext currentContext, double currentWeight,
                                      Runnable refreshUI) {
         CrateReference crateRef = currentContext.crateRef();
-        //CrateEditorHook hook = currentContext.hook();
         RewardReference rewardRef = currentContext.rewardRef();
 
         Crate crate = crateRef.get();
@@ -223,7 +236,9 @@ public class RewardEditorUIController {
 
     public boolean onDialogDeletionConfirmClick(Player player, RewardComponentHook hook, Crate crate, Reward reward) {
         // Dialog will handle the callback to move backward in the menu based on the result of this action.
-        return this.dispatcher.handleFeedback(player, this.editorService.deleteReward(hook, crate, reward.id()));
+        return this.dispatcher.handleFeedbackBase(player, reward,
+            this.editorService.deleteReward(hook, crate, reward.id())
+        );
     }
 
     public boolean onWeightDialogApply(Player player, RewardWeightDialogContext context, double weight) {
@@ -235,6 +250,16 @@ public class RewardEditorUIController {
 
         return crate != null && this.dispatcher.handleFeedbackBase(player, crate,
             this.editorService.setCrateRewardWeight(reward.id(), weight)
+        );
+    }
+
+    public boolean onSortDialogSelect(Player player, RewardSortDialogContext context, Identifier sorterId,
+                                      boolean invert) {
+        Crate crate = context.crateRef().get();
+        RewardComponentHook hook = context.hook();
+
+        return crate != null && this.dispatcher.handleFeedbackBase(player, crate,
+            this.editorService.sortRewards(hook, crate, sorterId, invert)
         );
     }
 

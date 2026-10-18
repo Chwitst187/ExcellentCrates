@@ -6,9 +6,10 @@ import java.util.concurrent.CompletableFuture;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NullMarked;
 
 import su.nightexpress.engine.action.ActionResult;
-import su.nightexpress.engine.cache.CacheStrategy;
+import su.nightexpress.engine.data.cache.CacheStrategy;
 import su.nightexpress.engine.id.Identifier;
 import su.nightexpress.excellentcrates.api.CratesPlugin;
 import su.nightexpress.excellentcrates.api.key.CrateKey;
@@ -17,11 +18,13 @@ import su.nightexpress.excellentcrates.keys.item.KeyItemService;
 import su.nightexpress.excellentcrates.keys.lang.KeyLang;
 import su.nightexpress.excellentcrates.keys.storage.db.KeyStorageCachedDataService;
 import su.nightexpress.excellentcrates.keys.storage.model.StoredKey;
+import su.nightexpress.excellentcrates.util.InventoryUtils;
 import su.nightexpress.nightcore.util.NumberUtil;
 import su.nightexpress.nightcore.util.Players;
 import su.nightexpress.nightcore.util.placeholder.CommonPlaceholders;
 
-public final class KeyBalanceService {
+@NullMarked
+public class KeyBalanceService {
 
     private final CratesPlugin                plugin;
     private final KeyStorageCachedDataService storageService;
@@ -53,18 +56,7 @@ public final class KeyBalanceService {
     }
 
     public int countPhysicalKeys(Player player, Identifier keyId) {
-        int balance = 0;
-
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item == null) continue;
-
-            Identifier id = this.itemService.getKeyIdFromItem(item);
-            if (id != null && id.equals(keyId)) {
-                balance += item.getAmount();
-            }
-        }
-
-        return balance;
+        return InventoryUtils.countInventoryAmount(player, itemStack -> this.itemService.isKeyItem(itemStack, keyId));
     }
 
     public int countVirtualKeys(Player player, CrateKey key) {
@@ -139,7 +131,10 @@ public final class KeyBalanceService {
         }
 
         int unclaimed = storedKey.getUnclaimedAmount();
-        this.addKey(player, key, unclaimed);
+        ActionResult result = this.addKey(player, key, unclaimed);
+        if (!result.success()) {
+            return result;
+        }
         storedKey.setUnclaimedAmount(0);
         this.storageService.markDirty(storedKey);
 
@@ -167,6 +162,11 @@ public final class KeyBalanceService {
                 return ActionResult.fail(KeyLang.ERROR_ITEM_CREATION_FAILED);
             }
 
+            int space = InventoryUtils.countInventorySpace(player, keyItem);
+            if (space < absAmount) {
+                return ActionResult.fail(KeyLang.ERROR_INVENTORY_SPACE);
+            }
+
             keyItem.setAmount(absAmount);
             Players.addItem(player, keyItem);
         }
@@ -176,17 +176,6 @@ public final class KeyBalanceService {
         );
     }
 
-    /**
-     * Gives a key to a player asynchronously.
-     * If the key is virtual, it will update the player's virtual balance in the database.
-     * If the key is physical and the player is online, it will add the key item to their inventory.
-     * If the player is offline, it will add the unclaimed amount to their account for later retrieval.
-     * 
-     * @param playerId the UUID of the player to give the key to
-     * @param key      the key to give
-     * @param amount   the amount of keys to give (can be negative for removal)
-     * @return the result of the action
-     */
     public CompletableFuture<ActionResult> giveKeyAsync(UUID playerId, CrateKey key, int amount) {
         Identifier keyId = key.getId();
         int absAmount = Math.abs(amount);
@@ -246,32 +235,15 @@ public final class KeyBalanceService {
             this.storageService.markDirty(storedKey);
         }
         else {
-            this.removeFromInventory(player, key, absAmount);
+            InventoryUtils.removeFromInventory(player,
+                itemStack -> this.itemService.isKeyItem(itemStack, keyId),
+                absAmount
+            );
         }
 
         return ActionResult.ok(KeyLang.KEY_REMOVE_FEEDBACK, ctx -> ctx
             .with(CommonPlaceholders.GENERIC_AMOUNT, () -> NumberUtil.format(absAmount))
         );
-    }
-
-    private void removeFromInventory(Player player, CrateKey key, int absAmount) {
-        Identifier keyId = key.getId();
-
-        int removed = 0;
-        for (ItemStack itemStack : player.getInventory().getContents()) {
-            if (itemStack == null || itemStack.getType().isAir()) continue;
-
-            Identifier id = this.itemService.getKeyIdFromItem(itemStack);
-            if (id == null || !id.equals(keyId)) continue;
-
-            int toRemove = Math.min(itemStack.getAmount(), absAmount - removed);
-            itemStack.setAmount(itemStack.getAmount() - toRemove);
-            removed += toRemove;
-
-            if (removed >= absAmount) {
-                break;
-            }
-        }
     }
 
     public CompletableFuture<ActionResult> removeKeyAsync(UUID playerId, CrateKey key, int amount) {
@@ -346,7 +318,7 @@ public final class KeyBalanceService {
                 this.addKey(player, key, diff);
             }
             else if (diff < 0) {
-                this.removeFromInventory(player, key, -diff);
+                this.removeKey(player, key, -diff);
             }
         }
 

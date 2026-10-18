@@ -34,6 +34,7 @@ public final class KeyLang implements LangContainer {
     public static final TextLocale COMMAND_SET_DESCRIPTION = LangEntry
         .builder("keys.command.set.description")
         .text("Sets a key balance for a player.");
+
     public static final TextLocale COMMAND_REMOVE_DESCRIPTION = LangEntry
         .builder("keys.command.remove.description")
         .text("Removes a key from a player.");
@@ -131,6 +132,7 @@ public final class KeyLang implements LangContainer {
         .chatMessage("Your " + TagWrappers.WHITE.wrap(SharedPlaceholders.KEY_NAME) + " amount has been set to " +
             TagWrappers.WHITE.wrap("x" + CommonPlaceholders.GENERIC_AMOUNT) + "."
         );
+
     public static final MessageLocale KEY_REMOVE_FEEDBACK = LangEntry
         .builder("keys.key.remove.feedback")
         .chatMessage("You removed " + TagWrappers.WHITE.wrap("x" + CommonPlaceholders.GENERIC_AMOUNT) + " " +
@@ -173,6 +175,10 @@ public final class KeyLang implements LangContainer {
     public static final MessageLocale KEY_REDEEM_NO_UNCLAIMED = LangEntry
         .builder("keys.key.redeem.no_unclaimed")
         .chatMessage("You have no unclaimed " + TagWrappers.WHITE.wrap(SharedPlaceholders.KEY_NAME) + ".");
+
+    public static final MessageLocale ERROR_INVENTORY_SPACE = LangEntry
+        .builder("keys.error.inventory_space")
+        .chatMessage("The player's inventory does not have enough space.");
 
     public static final MessageLocale ERROR_ITEM_CREATION_FAILED = LangEntry
         .builder("keys.error.item_creation_failed")

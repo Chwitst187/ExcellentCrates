@@ -2,11 +2,10 @@ package su.nightexpress.excellentcrates.rarity;
 
 import org.jspecify.annotations.NullMarked;
 
-import su.nightexpress.engine.component.BaseModuleBootstrap;
 import su.nightexpress.engine.component.ComponentBundle;
-import su.nightexpress.engine.component.CoreDependencies;
 import su.nightexpress.engine.service.ServiceRegistry;
 import su.nightexpress.engine.ui.CoreUIService;
+import su.nightexpress.excellentcrates.api.CoreDependencies;
 import su.nightexpress.excellentcrates.api.CoreServices;
 import su.nightexpress.excellentcrates.api.CratesPlugin;
 import su.nightexpress.excellentcrates.api.rarity.Rarity;
@@ -14,33 +13,35 @@ import su.nightexpress.excellentcrates.api.rarity.reward.RarityComponent;
 import su.nightexpress.excellentcrates.api.reward.component.RewardComponentKeys;
 import su.nightexpress.excellentcrates.api.reward.dispatcher.RewardMessageDispatcher;
 import su.nightexpress.excellentcrates.api.reward.registry.RewardRegistry;
+import su.nightexpress.excellentcrates.core.bootstrap.CrateModuleBootstrap;
 import su.nightexpress.excellentcrates.rarity.api.RarityAPIProvider;
 import su.nightexpress.excellentcrates.rarity.data.RarityDataConfiguration;
 import su.nightexpress.excellentcrates.rarity.data.RarityDataService;
 import su.nightexpress.excellentcrates.rarity.data.component.RarityDataLoader;
-import su.nightexpress.excellentcrates.rarity.io.RarityIOConfiguration;
-import su.nightexpress.excellentcrates.rarity.io.RarityIOService;
+import su.nightexpress.excellentcrates.rarity.lang.RarityLang;
 import su.nightexpress.excellentcrates.rarity.reward.component.DefaultRarityComponent;
 import su.nightexpress.excellentcrates.rarity.reward.component.codec.RarityComponentCodec;
 import su.nightexpress.excellentcrates.rarity.reward.component.editor.RarityComponentEditorBootstrapContext;
 import su.nightexpress.excellentcrates.rarity.reward.component.extension.RarityComponentDataExtension;
 import su.nightexpress.excellentcrates.rarity.reward.placeholder.RarityRewardPlaceholder;
+import su.nightexpress.excellentcrates.rarity.reward.sort.RewardRarityIdSorter;
+import su.nightexpress.excellentcrates.rarity.reward.sort.RewardRarityWeightSorter;
 import su.nightexpress.nightcore.configuration.codec.ConfigCodecs;
 
 @NullMarked
-public class RarityModuleBootstrap extends BaseModuleBootstrap {
+public class RarityModuleBootstrap extends CrateModuleBootstrap {
 
     @Override
     public void onRegister(ServiceRegistry services, CoreDependencies dependencies) {
         CratesPlugin plugin = dependencies.plugin();
         CoreUIService coreUI = dependencies.uiService();
 
+        plugin.injectLang(RarityLang.class);
+
         ConfigCodecs.register(DefaultRarityComponent.class, RarityComponentCodec.INSTANCE);
 
         RarityRepository rarities = new RarityRepository();
-
-        RarityIOService ioService = RarityIOConfiguration.configure(dependencies);
-        RarityDataService dataService = RarityDataConfiguration.configure(rarities, ioService);
+        RarityDataService dataService = RarityDataConfiguration.configure(plugin, rarities);
 
         this.registerComponent(new RarityDataLoader(dataService, rarities));
 
@@ -55,6 +56,8 @@ public class RarityModuleBootstrap extends BaseModuleBootstrap {
 
             rewardsApi.getData().registerExtension(new RarityComponentDataExtension(rarities));
             rewardsApi.getEditor().registerExtension(editorContext.getEditorExtension());
+            rewardsApi.getEditor().registerSorter(new RewardRarityWeightSorter(rarities));
+            rewardsApi.getEditor().registerSorter(new RewardRarityIdSorter());
             rewardsApi.getPlaceholders().registerPlaceholder(new RarityRewardPlaceholder(rarities));
             rewardsApi.getView().setColorProvider((reward, defaultColor) -> {
                 RarityComponent component = reward.getComponentOrNull(RewardComponentKeys.RARITY);

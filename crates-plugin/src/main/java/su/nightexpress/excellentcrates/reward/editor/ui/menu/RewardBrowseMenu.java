@@ -1,6 +1,5 @@
 package su.nightexpress.excellentcrates.reward.editor.ui.menu;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -87,13 +86,13 @@ public class RewardBrowseMenu extends AbstractObjectMenu<RewardBrowseMenuContext
 
     @Override
     public void defineDefaultLayout() {
-        this.addNextPageButton(41);
-        this.addPreviousPageButton(39);
-
         this.addBackgroundItem(Material.GRAY_STAINED_GLASS_PANE, IntStream.range(0, 36).toArray());
         this.addBackgroundItem(Material.BLACK_STAINED_GLASS_PANE, IntStream.range(36, 45).toArray());
 
         this.addBackButton(this::handleBack, 36);
+
+        this.addNextPageButton(41);
+        this.addPreviousPageButton(39);
 
         this.addDefaultButton("create", MenuItem.button()
             .defaultState(ItemState.builder()
@@ -179,6 +178,19 @@ public class RewardBrowseMenu extends AbstractObjectMenu<RewardBrowseMenuContext
             .build()
         );
 
+        items.add(MenuItem.button()
+            .defaultState(ItemState.builder()
+                .icon(NightItem.fromType(Material.COMPARATOR)
+                    .hideAllComponents()
+                    .localized(RewardEditorLang.UI_INVENTORY_BROWSE_BUTTON_SORT)
+                )
+                .action(this::handleSort)
+                .build()
+            )
+            .slots(42)
+            .build()
+        );
+
         Crate crate = menuContext.crateRef().get();
         if (crate == null) return;
 
@@ -190,7 +202,6 @@ public class RewardBrowseMenu extends AbstractObjectMenu<RewardBrowseMenuContext
             .stream()
             .map(entry -> this.repository.resolveReward(crate.id(), entry.getRewardId()))
             .filter(Objects::nonNull)
-            .sorted(Comparator.comparing(reward -> reward.rawId().value()))
             .toList();
 
         this.rewardPopulator.populateTo(context, rewardIds, items);
@@ -239,13 +250,22 @@ public class RewardBrowseMenu extends AbstractObjectMenu<RewardBrowseMenuContext
         this.controller.onBrowseMenuManualCreationClick(player, menuContext, copy, refreshUI);
     }
 
+    private void handleSort(ActionContext context) {
+        Player player = context.getPlayer();
+        RewardBrowseMenuContext menuContext = this.getObject(context);
+
+        Runnable refresh = () -> this.refresh(player);
+        this.controller.onBrowseMenuSortClick(player, menuContext, refresh);
+    }
+
     private void handleRewardClick(ActionContext context, Reward reward) {
         Player player = context.getPlayer();
         RewardBrowseMenuContext menuContext = this.getObject(context);
+        int page = context.getViewer().getCurrentPage();
 
         Crate crate = menuContext.crateRef().get();
         if (crate == null) return;
 
-        this.controller.onBrowseMenuRewardClick(player, reward, menuContext);
+        this.controller.onBrowseMenuRewardClick(player, reward, menuContext, page);
     }
 }
