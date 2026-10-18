@@ -3,7 +3,7 @@ package su.nightexpress.excellentcrates.crates;
 import org.jspecify.annotations.NullMarked;
 
 import su.nightexpress.engine.component.ComponentBundle;
-import su.nightexpress.engine.component.CoreDependencies;
+import su.nightexpress.excellentcrates.api.CoreDependencies;
 import su.nightexpress.engine.component.DatabaseClient;
 import su.nightexpress.engine.service.ServiceRegistry;
 import su.nightexpress.engine.ui.CoreUIService;
